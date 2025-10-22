@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: order-service
+
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true  # 🔥 이 설정이 없으면 fallback이 동작하지 않음
+
+server:
+  port: 8082
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
