@@ -5,7 +5,7 @@ spring:
   cloud:
     openfeign:
       circuitbreaker:
-        enabled: true  # 🔥 이 설정이 없으면 fallback이 동작하지 않음
+        enabled: true
 
 server:
   port: 8082
