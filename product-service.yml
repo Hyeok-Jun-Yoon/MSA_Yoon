@@ -6,7 +6,7 @@ spring:
     name: product-service
   
   kafka:
-    bootstrap-servers: kafka:9094
+    bootstrap-servers: localhost:9094
     consumer:
       group-id: product-consumer-group
       auto-offset-reset: earliest
