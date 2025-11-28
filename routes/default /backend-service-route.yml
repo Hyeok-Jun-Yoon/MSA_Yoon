@@ -1,0 +1,33 @@
+---
+id: "backend-service-route"
+uri: "lb://backend-service"
+predicates:
+- "Path=/api/backend/**"
+filters:
+- name: "PreLoggingFilter"
+  args:
+    baseMessage: "backend-service-route-request"
+    preLogger: true
+    order: 0
+- name: "CircuitBreaker"
+  args:
+    name: "backend-service-routeCircuitBreaker"
+- name: "Retry"
+  args:
+    methods: "GET,POST"
+    backoff:
+      basedOnPreviousValue: false
+      firstBackoff: "50ms"
+      factor: 2
+      maxBackoff: "500ms"
+    statuses: "BAD_GATEWAY,SERVICE_UNAVAILABLE,NOT_FOUND"
+    retries: 3
+- name: "PostLoggingFilter"
+  args:
+    baseMessage: "backend-service-route-response"
+    order: 100
+    postLogger: true
+metadata:
+  group: "default"
+  description: "Backend service route"
+  enabled: true
