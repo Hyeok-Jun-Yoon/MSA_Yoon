@@ -1,0 +1,94 @@
+spring:
+  application:
+    name: api-gateway
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.r2dbc.R2dbcRepositoriesAutoConfiguration
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      server:
+        webflux:
+          httpclient:
+            connect-timeout: 5000
+            response-timeout: 5000ms
+          globalcors:
+            add-to-simple-url-handler-mapping: true
+            cors-configurations:
+              '[/**]':
+                allowed-origins:
+                  - http://localhost:${PORTAL_WEB_PORT:8090}
+                  - http://127.0.0.1:${PORTAL_WEB_PORT:8090}
+                  - http://localhost:${DEVELOPER_PORTAL_PORT:8096}
+                  - http://127.0.0.1:${DEVELOPER_PORTAL_PORT:8096}
+                  - http://localhost:8095
+                  - http://127.0.0.1:8095
+                  - http://localhost:8082
+                  - http://127.0.0.1:8082
+                  - http://localhost:8083
+                  - http://127.0.0.1:8083
+                  - http://localhost:8084
+                  - http://127.0.0.1:8084
+                  - http://localhost
+                  - http://127.0.0.1
+                allowed-methods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowed-headers:
+                  - "*"
+                exposed-headers:
+                  - "*"
+                allow-credentials: true
+                max-age: 3600
+          default-filters:
+            - name: PreLoggingFilter
+              args:
+                baseMessage: Gateway pre filter
+                preLogger: true
+                order: 0
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://localhost:8081/realms/master}
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://localhost:8081/realms/master/protocol/openid-connect/certs}
+
+gateway:
+  security:
+    jwks-uri: ${GATEWAY_SECURITY_JWKS_URI:http://localhost:8081/realms/master/protocol/openid-connect/certs}
+    jwks-cache-ttl: PT10M
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      backendCircuitBreaker:
+        register-health-indicator: true
+        sliding-window-size: 20
+        failure-rate-threshold: 40
+
+management:
+  endpoint:
+    gateway:
+      access: unrestricted
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,refresh,env,gateway
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    web:
+      server:
+        request:
+          matching-strategy: path
+    export:
+      prometheus:
+        enabled: true
