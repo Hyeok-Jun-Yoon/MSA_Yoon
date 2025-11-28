@@ -1,34 +1,43 @@
-server:
-  port: 8082
-
 spring:
   application:
     name: order-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/master}
   cloud:
-    openfeign:
-      circuitbreaker:
-        enabled: true
+    bus:
+      enabled: ${SPRING_CLOUD_BUS_ENABLED:false}
+    stream:
+      defaultBinder: rabbit
 
-  kafka:
-    bootstrap-servers: kafka:9094
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+server:
+  port: ${ORDER_SERVICE_PORT:8084}
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://discovery-server:8761/eureka
+resilience4j:
+  circuitbreaker:
+    instances:
+      orderServiceCircuit:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+
+logging:
+  level:
+    com.example.order: INFO
 
 management:
-  tracing:
-    sampling:
-      probability: 1.0  # 모든 요청 추적
-  zipkin:
-    tracing:
-      endpoint: http://zipkin:9411/api/v2/spans
-
   endpoints:
     web:
       exposure:
-        include: '*'
+        include: health,info,metrics,prometheus,refresh
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
