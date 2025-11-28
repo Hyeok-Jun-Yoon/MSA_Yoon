@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: backend-service
+  cloud:
+    bus:
+      enabled: ${SPRING_CLOUD_BUS_ENABLED:false}
+    stream:
+      defaultBinder: rabbit
+
+backend:
+  greeting: Hello from config-server backend profile! git test3
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh,metrics,prometheus
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
