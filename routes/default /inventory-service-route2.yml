@@ -1,0 +1,32 @@
+---
+id: "inventory-service-route2"
+uri: "lb://inventory-service"
+predicates:
+- "Path=/inventory2/**"
+filters:
+- name: "PreLoggingFilter"
+  args:
+    baseMessage: "inventory-service-route2-request"
+    preLogger: true
+    order: 0
+- name: "CircuitBreaker"
+  args:
+    name: "inventory-service-route2CircuitBreaker"
+- name: "Retry"
+  args:
+    retries: 3
+    statuses: "BAD_GATEWAY,SERVICE_UNAVAILABLE,NOT_FOUND"
+    methods: "GET,POST"
+    backoff:
+      firstBackoff: "50ms"
+      maxBackoff: "500ms"
+      factor: 2
+      basedOnPreviousValue: false
+- name: "PostLoggingFilter"
+  args:
+    baseMessage: "inventory-service-route2-response"
+    postLogger: true
+    order: 100
+metadata:
+  group: "default"
+  enabled: true
